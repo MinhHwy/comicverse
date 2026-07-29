@@ -1,0 +1,32 @@
+export const comics = [
+  {
+    id: 1,
+    slug: "trang-quynh",
+    title: "Trạng Quỳnh",
+    cover: "/covers/trang-quynh.jpg",
+    chapters: 120,
+    views: 1250000,
+    rating: 4.9,
+    followers: 12000,
+  },
+  {
+    id: 2,
+    slug: "than-dong-dat-viet",
+    title: "Thần Đồng Đất Việt",
+    cover: "/covers/than-dong-dat-viet.jpg",
+    chapters: 240,
+    views: 3520000,
+    rating: 5.0,
+    followers: 35600,
+  },
+  {
+    id: 3,
+    slug: "trang-quynh-nhi",
+    title: "Trạng Quỷnh",
+    cover: "/covers/trang-quynh-nhi.jpg",
+    chapters: 180,
+    views: 1980000,
+    rating: 4.8,
+    followers: 18400,
+  },
+];
