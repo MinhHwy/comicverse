@@ -44,5 +44,12 @@ export const chapters = [
     title: "Trạng chữa bệnh",
     views: 9100,
   },
-]
+  {
+  id: 7,
+  comicSlug: "trang-quynh",
+  chapter: 4,
+  title: "Trạng Quỳnh đi thi",
+  views: 0,
+},
+];
 export default chapters;

@@ -1,24 +1,6 @@
-// interface PageProps {
-//   params: Promise<{
-//     slug: string;
-//   }>;
-// }
-
-// export default async function ComicDetailPage({
-//   params,
-// }: PageProps) {
-//   const { slug } = await params;
-
-//   return (
-//     <div className="mx-auto max-w-7xl p-8">
-//       <h1 className="text-4xl font-bold">
-//         {slug}
-//       </h1>
-//     </div>
-//   );
-// }
+import fs from "fs/promises";
+import path from "path";
 import { notFound } from "next/navigation";
-
 import ComicHeader from "@/components/comic/detail/ComicHeader";
 import ComicDescription from "@/components/comic/detail/ComicDescription";
 import ComicActions from "@/components/comic/detail/ComicActions";
@@ -46,6 +28,27 @@ export default async function ComicDetailPage({
     notFound();
   }
 
+  const comicsPath = path.join(
+  process.cwd(),
+  "data",
+  "comics.json"
+);
+
+const comicsFile = await fs.readFile(
+  comicsPath,
+  "utf-8"
+);
+
+const comicsData = JSON.parse(comicsFile);
+
+const comicFromJson = comicsData.find(
+  (item: { slug: string }) => item.slug === slug
+);
+
+const comicViews =
+  comicFromJson?.views ?? comic.views;
+  console.log("Comic views từ JSON:", comicViews);
+
   const comicChapters = chapters
     .filter((c) => c.comicSlug === slug)
     .sort((a, b) => b.chapter - a.chapter);
@@ -53,7 +56,10 @@ export default async function ComicDetailPage({
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
 
-      <ComicHeader comic={comic} />
+      <ComicHeader comic={{
+        ...comic,
+        views: comicViews,
+      }} />
 
       <ComicActions />
 
