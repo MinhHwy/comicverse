@@ -1,27 +1,28 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+// import { PrismaClient } from "@prisma/client";
+// import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
-const connectionString = process.env.DATABASE_URL;
+// const connectionString = process.env.DATABASE_URL;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL chưa được load");
-}
+// if (!connectionString) {
+//   throw new Error("DATABASE_URL chưa được load");
+// }
 
-const url = new URL(connectionString);
+// const url = new URL(connectionString);
 
-const adapter = new PrismaMariaDb({
-  host: url.hostname,
-  port: Number(url.port) || 3306,
-  user: decodeURIComponent(url.username),
-  password: decodeURIComponent(url.password),
-  database: url.pathname.replace("/", ""),
-});
+// const adapter = new PrismaMariaDb({
+//   host: url.hostname,
+//   port: Number(url.port) || 3306,
+//   user: decodeURIComponent(url.username),
+//   password: decodeURIComponent(url.password),
+//   database: url.pathname.replace("/", ""),
+// });
 
-const prisma = new PrismaClient({
-  adapter,
-});
+// const prisma = new PrismaClient({
+//   adapter,
+// });
 
 // =========================
 // GET - Lấy tất cả chapter
@@ -67,9 +68,10 @@ export async function GET() {
         status: 500,
       }
     );
-  } finally {
-    await prisma.$disconnect();
   }
+  // } finally {
+  //   await prisma.$disconnect();
+  // }
 }
 
 // =========================
@@ -214,7 +216,8 @@ export async function POST(
         status: 500,
       }
     );
-  } finally {
-    await prisma.$disconnect();
   }
+  // } finally {
+  //   await prisma.$disconnect();
+  // }
 }

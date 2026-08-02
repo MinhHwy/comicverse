@@ -1,19 +1,20 @@
 import "dotenv/config";
+import { prisma } from "@/lib/prisma";
 
-import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+// import { PrismaClient } from "@prisma/client";
+// import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
-const adapter = new PrismaMariaDb({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: process.env.MYSQL_PASSWORD!,
-  database: "comicverse",
-});
+// const adapter = new PrismaMariaDb({
+//   host: "localhost",
+//   port: 3306,
+//   user: "root",
+//   password: process.env.MYSQL_PASSWORD!,
+//   database: "comicverse",
+// });
 
-const prisma = new PrismaClient({
-  adapter,
-});
+// const prisma = new PrismaClient({
+//   adapter,
+// });
 
 async function main() {
   console.log("Prisma test START");
