@@ -40,22 +40,6 @@ export async function GET(
       where: {
         slug,
       },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        alternativeTitle: true,
-        author: true,
-        artist: true,
-        description: true,
-        cover: true,
-        banner: true,
-        status: true,
-        views: true,
-        followers: true,
-        rating: true,
-        publishedYear: true,
-      },
     });
 
     if (!comic) {
@@ -69,13 +53,39 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(comic);
+    const chapters = await prisma.chapter.findMany({
+      where: {
+        comicId: comic.id,
+      },
+      orderBy: {
+        chapterNumber: "asc",
+      },
+      select: {
+        id: true,
+        chapterNumber: true,
+        title: true,
+        views: true,
+      },
+    });
+
+    return NextResponse.json(
+      chapters.map((chapter) => ({
+        id: chapter.id,
+        comicSlug: slug,
+        chapter: chapter.chapterNumber,
+        title: chapter.title,
+        views: chapter.views,
+      }))
+    );
   } catch (error) {
-    console.error("Get comic error:", error);
+    console.error(
+      "Get comic chapters error:",
+      error
+    );
 
     return NextResponse.json(
       {
-        message: "Có lỗi xảy ra khi lấy thông tin truyện.",
+        message: "Có lỗi xảy ra khi lấy danh sách chapter.",
       },
       {
         status: 500,

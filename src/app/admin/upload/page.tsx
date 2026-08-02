@@ -1,78 +1,185 @@
 "use client";
 
-import { useState } from "react";
-import { comics } from "@/data/comics";
+import { useEffect, useState } from "react";
+
+interface Comic {
+  id: number;
+  slug: string;
+  title: string;
+}
 
 export default function UploadPage() {
+  const [comics, setComics] = useState<Comic[]>([]);
   const [comicSlug, setComicSlug] = useState("");
   const [chapter, setChapter] = useState("");
+  const [chapterTitle, setChapterTitle] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  // =========================
+  // Lấy danh sách truyện
+  // =========================
+
+  useEffect(() => {
+    const loadComics = async () => {
+      try {
+        const response = await fetch("/api/comics", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            "Không thể lấy danh sách truyện"
+          );
+        }
+
+        const data = await response.json();
+
+        setComics(data);
+      } catch (error) {
+        console.error(
+          "Load comics error:",
+          error
+        );
+
+        alert(
+          "Không thể tải danh sách truyện!"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadComics();
+  }, []);
+
+  // =========================
+  // Chọn ảnh
+  // =========================
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (!event.target.files) return;
 
-    const selectedFiles = Array.from(event.target.files);
+    const selectedFiles = Array.from(
+      event.target.files
+    );
 
     setFiles(selectedFiles);
   };
 
+  // =========================
+  // Upload
+  // =========================
+
   const handleUpload = async () => {
-  if (!comicSlug) {
-    alert("Vui lòng chọn bộ truyện!");
-    return;
-  }
-
-  if (!chapter) {
-    alert("Vui lòng nhập số tập!");
-    return;
-  }
-
-  if (files.length === 0) {
-    alert("Vui lòng chọn ảnh!");
-    return;
-  }
-
-  const formData = new FormData();
-
-  formData.append("comicSlug", comicSlug);
-  formData.append("chapter", chapter);
-
-  files.forEach((file) => {
-    formData.append("files", file);
-  });
-
-  try {
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.message || "Upload thất bại!");
+    if (!comicSlug) {
+      alert(
+        "Vui lòng chọn bộ truyện!"
+      );
       return;
     }
 
-    console.log("Upload result:", data);
+    if (!chapter) {
+      alert(
+        "Vui lòng nhập số tập!"
+      );
+      return;
+    }
 
-    alert(
-      `Upload thành công ${data.files.length} ảnh!`
+    if (!chapterTitle.trim()) {
+      alert(
+        "Vui lòng nhập tên chương!"
+      );
+      return;
+    }
+
+    if (files.length === 0) {
+      alert(
+        "Vui lòng chọn ảnh!"
+      );
+      return;
+    }
+
+    setUploading(true);
+
+    const formData = new FormData();
+
+    formData.append(
+      "comicSlug",
+      comicSlug
     );
 
-    setFiles([]);
-  } catch (error) {
-    console.error(error);
+    formData.append(
+      "chapter",
+      chapter
+    );
 
-    alert("Không thể kết nối tới server!");
-  }
-};
+    formData.append(
+      "chapterTitle",
+      chapterTitle.trim()
+    );
+
+    files.forEach((file) => {
+      formData.append(
+        "files",
+        file
+      );
+    });
+
+    try {
+      const response = await fetch(
+        "/api/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        alert(
+          data.message ||
+            "Upload thất bại!"
+        );
+
+        return;
+      }
+
+      console.log(
+        "Upload result:",
+        data
+      );
+
+      alert(
+        `Upload thành công ${data.files.length} ảnh!`
+      );
+
+      setFiles([]);
+      setChapter("");
+      setChapterTitle("");
+    } catch (error) {
+      console.error(
+        "Upload error:",
+        error
+      );
+
+      alert(
+        "Không thể kết nối tới server!"
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-4xl p-10">
 
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold">
           🖼 Upload ảnh truyện
@@ -85,33 +192,51 @@ export default function UploadPage() {
 
       <div className="space-y-6 rounded-2xl border bg-white p-8 shadow">
 
-        {/* Bộ truyện */}
+        {/* =========================
+            Bộ truyện
+        ========================= */}
+
         <div>
           <label className="mb-2 block font-semibold">
             Bộ truyện
           </label>
 
-          <select
-            value={comicSlug}
-            onChange={(e) => setComicSlug(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 outline-none focus:border-orange-500"
-          >
-            <option value="">
-              -- Chọn bộ truyện --
-            </option>
-
-            {comics.map((comic) => (
-              <option
-                key={comic.id}
-                value={comic.slug}
-              >
-                {comic.title}
+          {loading ? (
+            <div className="rounded-xl border px-4 py-3 text-gray-500">
+              Đang tải danh sách truyện...
+            </div>
+          ) : (
+            <select
+              value={comicSlug}
+              onChange={(e) =>
+                setComicSlug(
+                  e.target.value
+                )
+              }
+              className="w-full rounded-xl border px-4 py-3 outline-none focus:border-orange-500"
+            >
+              <option value="">
+                -- Chọn bộ truyện --
               </option>
-            ))}
-          </select>
+
+              {comics.map(
+                (comic) => (
+                  <option
+                    key={comic.id}
+                    value={comic.slug}
+                  >
+                    {comic.title}
+                  </option>
+                )
+              )}
+            </select>
+          )}
         </div>
 
-        {/* Số tập */}
+        {/* =========================
+            Số tập
+        ========================= */}
+
         <div>
           <label className="mb-2 block font-semibold">
             Số tập
@@ -121,13 +246,47 @@ export default function UploadPage() {
             type="number"
             min="1"
             value={chapter}
-            onChange={(e) => setChapter(e.target.value)}
+            onChange={(e) =>
+              setChapter(
+                e.target.value
+              )
+            }
             placeholder="Ví dụ: 4"
             className="w-full rounded-xl border px-4 py-3 outline-none focus:border-orange-500"
           />
         </div>
 
-        {/* Upload */}
+        {/* =========================
+            Tên chương
+        ========================= */}
+
+        <div>
+          <label className="mb-2 block font-semibold">
+            Tên chương
+          </label>
+
+          <input
+            type="text"
+            value={chapterTitle}
+            onChange={(e) =>
+              setChapterTitle(
+                e.target.value
+              )
+            }
+            placeholder="Ví dụ: Đại chiến với quan huyện"
+            className="w-full rounded-xl border px-4 py-3 outline-none focus:border-orange-500"
+          />
+
+          <p className="mt-2 text-sm text-gray-500">
+            Tên này sẽ được lưu vào Database
+            và hiển thị khi đọc truyện.
+          </p>
+        </div>
+
+        {/* =========================
+            Upload ảnh
+        ========================= */}
+
         <div>
           <label className="mb-2 block font-semibold">
             Ảnh truyện
@@ -151,48 +310,70 @@ export default function UploadPage() {
               type="file"
               accept="image/*"
               multiple
-              onChange={handleFileChange}
+              onChange={
+                handleFileChange
+              }
               className="hidden"
             />
 
           </label>
         </div>
 
-        {/* Danh sách ảnh */}
+        {/* =========================
+            Danh sách ảnh
+        ========================= */}
+
         {files.length > 0 && (
           <div>
             <h2 className="mb-3 font-semibold">
-              Đã chọn {files.length} ảnh
+              Đã chọn{" "}
+              {files.length} ảnh
             </h2>
 
             <div className="max-h-60 overflow-y-auto rounded-xl border">
 
-              {files.map((file, index) => (
-                <div
-                  key={`${file.name}-${index}`}
-                  className="flex items-center justify-between border-b px-4 py-3 last:border-b-0"
-                >
-                  <span className="truncate">
-                    {file.name}
-                  </span>
+              {files.map(
+                (file, index) => (
+                  <div
+                    key={`${file.name}-${index}`}
+                    className="flex items-center justify-between border-b px-4 py-3 last:border-b-0"
+                  >
+                    <span className="truncate">
+                      {file.name}
+                    </span>
 
-                  <span className="ml-4 text-sm text-gray-500">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </span>
-                </div>
-              ))}
+                    <span className="ml-4 text-sm text-gray-500">
+                      {(
+                        file.size /
+                        1024 /
+                        1024
+                      ).toFixed(2)}{" "}
+                      MB
+                    </span>
+                  </div>
+                )
+              )}
 
             </div>
           </div>
         )}
 
-        {/* Button */}
+        {/* =========================
+            Button
+        ========================= */}
+
         <button
           type="button"
           onClick={handleUpload}
-          className="w-full rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
+          disabled={
+            loading ||
+            uploading
+          }
+          className="w-full rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          📤 Upload ảnh
+          {uploading
+            ? "⏳ Đang upload..."
+            : "📤 Upload ảnh"}
         </button>
 
       </div>

@@ -36,7 +36,7 @@ export default function AdminComicsPage() {
               </td>
 
               <td className="text-center">
-                {comic.chapters}
+                {comic.chapterCount}
               </td>
 
               <td className="text-center">

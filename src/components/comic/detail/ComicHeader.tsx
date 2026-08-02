@@ -1,7 +1,18 @@
 import Image from "next/image";
-import { Comic } from "@/types/comic";
 import { Eye, Heart, Star, BookOpen } from "lucide-react";
 import { formatNumber } from "@/utils/formatNumber";
+
+interface Comic {
+  slug: string;
+  title: string;
+  author: string;
+  cover: string;
+  status: string;
+  views: number;
+  followers: number;
+  rating: number | string;
+  chapterCount: number;
+}
 
 interface Props {
   comic: Comic;
@@ -10,6 +21,7 @@ interface Props {
 export default function ComicHeader({ comic }: Props) {
   return (
     <section className="grid gap-8 md:grid-cols-[280px_1fr]">
+      
       <Image
         src={comic.cover}
         alt={comic.title}
@@ -19,7 +31,9 @@ export default function ComicHeader({ comic }: Props) {
       />
 
       <div>
-        <h1 className="text-4xl font-bold">{comic.title}</h1>
+        <h1 className="text-4xl font-bold">
+          {comic.title}
+        </h1>
 
         <p className="mt-2 text-gray-500">
           {comic.author}
@@ -27,44 +41,39 @@ export default function ComicHeader({ comic }: Props) {
 
         <div className="mt-6 flex flex-wrap gap-6">
 
+          {/* Rating */}
           <div className="flex items-center gap-2">
             <Star className="text-yellow-500" />
             {comic.rating}
           </div>
 
+          {/* Views */}
           <div className="flex items-center gap-2">
             <Eye />
             {formatNumber(comic.views)}
           </div>
 
+          {/* Followers */}
           <div className="flex items-center gap-2">
             <Heart />
             {formatNumber(comic.followers)}
           </div>
 
+          {/* Chapters */}
           <div className="flex items-center gap-2">
             <BookOpen />
-            {comic.chapters} tập
+            {comic.chapterCount} tập
           </div>
 
         </div>
 
+        {/* Status */}
         <div className="mt-6">
           <span className="rounded-full bg-green-100 px-4 py-2 text-green-700">
             {comic.status}
           </span>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {comic.categories.map((category) => (
-            <span
-              key={category}
-              className="rounded-full bg-orange-100 px-3 py-1 text-orange-600"
-            >
-              {category}
-            </span>
-          ))}
-        </div>
       </div>
     </section>
   );

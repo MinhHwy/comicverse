@@ -17,7 +17,7 @@ export interface Comic {
 
   categories: string[];
 
-  chapters: number;
+  chapterCount: number;
 
   views: number;
 

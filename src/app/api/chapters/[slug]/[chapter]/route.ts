@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { prisma } from "@/lib/prisma";
+
+// import { PrismaClient } from "@prisma/client";
+// import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 interface RouteParams {
   params: Promise<{
@@ -9,6 +11,26 @@ interface RouteParams {
   }>;
 }
 
+// const connectionString = process.env.DATABASE_URL;
+
+// if (!connectionString) {
+//   throw new Error("DATABASE_URL chưa được load");
+// }
+
+// const url = new URL(connectionString);
+
+// const adapter = new PrismaMariaDb({
+//   host: url.hostname,
+//   port: Number(url.port) || 3306,
+//   user: decodeURIComponent(url.username),
+//   password: decodeURIComponent(url.password),
+//   database: url.pathname.replace("/", ""),
+// });
+
+// const prisma = new PrismaClient({
+//   adapter,
+// });
+
 export async function GET(
   request: Request,
   { params }: RouteParams
@@ -16,41 +38,68 @@ export async function GET(
   try {
     const { slug, chapter } = await params;
 
-    const chapterDir = path.join(
-      process.cwd(),
-      "public",
-      "comics",
-      slug,
-      `chapter-${chapter}`
-    );
+    const chapterNumber = Number(chapter);
 
-    const files = await fs.readdir(chapterDir);
+    if (Number.isNaN(chapterNumber)) {
+      return NextResponse.json(
+        {
+          message: "Chapter không hợp lệ.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-    const imageFiles = files
-      .filter((file) =>
-        /\.(jpg|jpeg|png|webp)$/i.test(file)
-      )
-      .sort();
+    const chapterData = await prisma.chapter.findFirst({
+      where: {
+        chapterNumber,
+        comic: {
+          slug,
+        },
+      },
+      include: {
+        comic: true,
+        images: {
+          orderBy: {
+            pageNumber: "asc",
+          },
+        },
+      },
+    });
 
-    const images = imageFiles.map(
-      (file) =>
-        `/comics/${slug}/chapter-${chapter}/${file}`
-    );
+    if (!chapterData) {
+      return NextResponse.json(
+        {
+          message: "Không tìm thấy chương.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
 
     return NextResponse.json({
       slug,
-      chapter: Number(chapter),
-      images,
+      chapter: chapterData.chapterNumber,
+      title: chapterData.title,
+      views: chapterData.views,
+      images: chapterData.images.map(
+        (image) => image.imageUrl
+      ),
     });
   } catch (error) {
-    console.error("Get chapter images error:", error);
+    console.error(
+      "Get chapter from database error:",
+      error
+    );
 
     return NextResponse.json(
       {
-        message: "Không tìm thấy ảnh của chương.",
+        message: "Có lỗi xảy ra.",
       },
       {
-        status: 404,
+        status: 500,
       }
     );
   }

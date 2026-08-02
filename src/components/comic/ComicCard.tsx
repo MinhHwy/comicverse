@@ -2,14 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { Eye, BookOpen, Star, Heart } from "lucide-react";
 
-import { Comic } from "@/types/comic";
 import { formatNumber } from "@/utils/formatNumber";
+import { Comic } from "@/types/comic";
+
+// interface Comic {
+//   id: number;
+//   slug: string;
+//   title: string;
+//   cover: string;
+//   views: number;
+//   followers: number;
+//   rating: number | string;
+//   chapterCount: number;
+// }
 
 interface ComicCardProps {
   comic: Comic;
 }
 
-export default function ComicCard({ comic }: ComicCardProps) {
+export default function ComicCard({
+  comic,
+}: ComicCardProps) {
   return (
     <Link
       href={`/comic/${comic.slug}`}
@@ -25,11 +38,13 @@ export default function ComicCard({ comic }: ComicCardProps) {
       </div>
 
       <div className="space-y-3 p-4">
+
         <h3 className="line-clamp-1 text-lg font-bold">
           {comic.title}
         </h3>
 
         <div className="flex justify-between text-sm text-gray-500">
+
           <span className="flex items-center gap-1">
             <Eye size={16} />
             {formatNumber(comic.views)}
@@ -39,23 +54,27 @@ export default function ComicCard({ comic }: ComicCardProps) {
             <Star size={16} />
             {comic.rating}
           </span>
+
         </div>
 
         <div className="flex justify-between text-sm text-gray-500">
+
           <span className="flex items-center gap-1">
             <BookOpen size={16} />
-            {comic.chapters} tập
+            {comic.chapterCount} tập
           </span>
 
           <span className="flex items-center gap-1">
             <Heart size={16} />
             {formatNumber(comic.followers)}
           </span>
+
         </div>
 
         <button className="w-full rounded-xl bg-orange-500 py-2 font-semibold text-white transition hover:bg-orange-600">
           📖 Đọc ngay
         </button>
+
       </div>
     </Link>
   );

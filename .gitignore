@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Local uploaded images
+/public/comics/
+
+# Local test files
+test-db.ts
+
+# AI / coding assistant folders
+/.agents/
+/.claude/
+/.windsurf/
+
+# Prisma local generated files
+/src/generated/prisma

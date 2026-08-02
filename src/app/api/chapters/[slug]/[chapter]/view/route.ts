@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+
+import { PrismaClient } from "@prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 interface RouteParams {
   params: Promise<{
@@ -9,20 +10,25 @@ interface RouteParams {
   }>;
 }
 
-interface Chapter {
-  id: number;
-  comicSlug: string;
-  chapter: number;
-  title: string;
-  views: number;
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL chưa được load");
 }
 
-interface Comic {
-  id: number;
-  slug: string;
-  title: string;
-  views: number;
-}
+const url = new URL(connectionString);
+
+const adapter = new PrismaMariaDb({
+  host: url.hostname,
+  port: Number(url.port) || 3306,
+  user: decodeURIComponent(url.username),
+  password: decodeURIComponent(url.password),
+  database: url.pathname.replace("/", ""),
+});
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 export async function POST(
   request: Request,
@@ -34,28 +40,36 @@ export async function POST(
     const chapterNumber = Number(chapter);
 
     // =========================
-    // Đọc chapters.json
+    // Kiểm tra chapter
     // =========================
 
-    const chaptersPath = path.join(
-      process.cwd(),
-      "data",
-      "chapters.json"
-    );
+    if (
+      !Number.isInteger(chapterNumber) ||
+      chapterNumber < 1
+    ) {
+      return NextResponse.json(
+        {
+          message: "Chapter không hợp lệ.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-    const chaptersFile = await fs.readFile(
-      chaptersPath,
-      "utf-8"
-    );
+    // =========================
+    // Tìm chapter trong Database
+    // =========================
 
-    const chapters: Chapter[] =
-      JSON.parse(chaptersFile);
-
-    const chapterData = chapters.find(
-      (item) =>
-        item.comicSlug === slug &&
-        item.chapter === chapterNumber
-    );
+    const chapterData =
+      await prisma.chapter.findFirst({
+        where: {
+          chapterNumber,
+          comic: {
+            slug,
+          },
+        },
+      });
 
     if (!chapterData) {
       return NextResponse.json(
@@ -68,72 +82,71 @@ export async function POST(
       );
     }
 
-    // Tăng lượt xem chương
-    chapterData.views += 1;
-
-    // Lưu chapters.json
-    await fs.writeFile(
-      chaptersPath,
-      JSON.stringify(chapters, null, 2),
-      "utf-8"
-    );
-
     // =========================
-    // Đọc comics.json
+    // Tăng views bằng Transaction
     // =========================
 
-    const comicsPath = path.join(
-      process.cwd(),
-      "data",
-      "comics.json"
-    );
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Tăng lượt xem chapter
+        const updatedChapter =
+          await tx.chapter.update({
+            where: {
+              id: chapterData.id,
+            },
+            data: {
+              views: {
+                increment: 1,
+              },
+            },
+          });
 
-    let comicViews: number | null = null;
+        // Tăng lượt xem comic
+        const updatedComic =
+          await tx.comic.update({
+            where: {
+              id: chapterData.comicId,
+            },
+            data: {
+              views: {
+                increment: 1,
+              },
+            },
+          });
 
-    try {
-      const comicsFile = await fs.readFile(
-        comicsPath,
-        "utf-8"
-      );
-
-      const comics: Comic[] =
-        JSON.parse(comicsFile);
-
-      const comic = comics.find(
-        (item) => item.slug === slug
-      );
-
-      if (comic) {
-        comic.views += 1;
-        comicViews = comic.views;
-
-        await fs.writeFile(
-          comicsPath,
-          JSON.stringify(comics, null, 2),
-          "utf-8"
-        );
+        return {
+          chapterViews: updatedChapter.views,
+          comicViews: updatedComic.views,
+        };
       }
-    } catch {
-      console.log(
-        "Không tìm thấy comics.json, chỉ cập nhật views chương."
-      );
-    }
+    );
+
+    // =========================
+    // Trả kết quả
+    // =========================
 
     return NextResponse.json({
       message: "Đã tăng lượt xem.",
-      chapterViews: chapterData.views,
-      comicViews,
+      chapterViews: result.chapterViews,
+      comicViews: result.comicViews,
     });
+
   } catch (error) {
-    console.error("View API error:", error);
+    console.error(
+      "View API error:",
+      error
+    );
 
     return NextResponse.json(
       {
-        message: "Có lỗi xảy ra.",
+        message:
+          "Có lỗi xảy ra khi cập nhật lượt xem.",
       },
       {
         status: 500,
       }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Comic {
+  id               Int       @id @default(autoincrement())
+  slug             String    @unique @db.VarChar(100)
+  title            String    @db.VarChar(255)
+  alternativeTitle String?   @db.VarChar(255)
+  author           String    @db.VarChar(255)
+  artist           String    @db.VarChar(255)
+  description      String    @db.Text
+  cover            String    @db.VarChar(500)
+  banner           String?   @db.VarChar(500)
+  status           String    @db.VarChar(50)
+  views            Int       @default(0)
+  followers        Int       @default(0)
+  rating           Decimal   @default(0) @db.Decimal(2, 1)
+  publishedYear    Int
+
+  chapters Chapter[]
+
+  @@map("comics")
+}
+
+model Chapter {
+  id            Int      @id @default(autoincrement())
+  comicId       Int
+  chapterNumber Int
+  title         String   @db.VarChar(255)
+  views         Int      @default(0)
+
+  comic Comic @relation(fields: [comicId], references: [id], onDelete: Cascade)
+
+  images ChapterImage[]
+
+  @@unique([comicId, chapterNumber])
+  @@map("chapters")
+}
+
+model ChapterImage {
+  id         Int    @id @default(autoincrement())
+  chapterId  Int
+  imageUrl   String @db.VarChar(500)
+  pageNumber Int
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([chapterId, pageNumber])
+  @@map("chapter_images")
+}

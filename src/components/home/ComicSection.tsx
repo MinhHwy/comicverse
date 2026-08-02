@@ -1,5 +1,5 @@
-import { Comic } from "@/types/comic";
 import ComicCard from "../comic/ComicCard";
+import { Comic } from "@/types/comic";
 
 interface ComicSectionProps {
   title: string;

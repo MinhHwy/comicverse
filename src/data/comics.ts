@@ -24,7 +24,7 @@ export const comics: Comic[] = [
 
     categories: ["Hài hước", "Dân gian", "Thiếu nhi"],
 
-    chapters: 120,
+    chapterCount: 24,
 
     views: 1250000,
 
@@ -58,7 +58,7 @@ export const comics: Comic[] = [
 
     categories: ["Hài hước", "Phiêu lưu", "Thiếu nhi"],
 
-    chapters: 240,
+    chapterCount: 240,
 
     views: 3520000,
 
@@ -92,7 +92,7 @@ export const comics: Comic[] = [
 
     categories: ["Hài hước", "Thiếu nhi"],
 
-    chapters: 180,
+    chapterCount: 180,
 
     views: 1980000,
 

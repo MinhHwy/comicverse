@@ -1,13 +1,9 @@
-import fs from "fs/promises";
-import path from "path";
 import { notFound } from "next/navigation";
+
 import ComicHeader from "@/components/comic/detail/ComicHeader";
 import ComicDescription from "@/components/comic/detail/ComicDescription";
 import ComicActions from "@/components/comic/detail/ComicActions";
 import ChapterList from "@/components/comic/detail/ChapterList";
-
-import { comics } from "@/data/comics";
-import { chapters } from "@/data/chapters";
 
 interface PageProps {
   params: Promise<{
@@ -15,51 +11,94 @@ interface PageProps {
   }>;
 }
 
+interface ComicResponse {
+  id: number;
+  slug: string;
+  title: string;
+  alternativeTitle: string | null;
+  author: string;
+  artist: string;
+  description: string;
+  cover: string;
+  banner: string | null;
+  status: string;
+  views: number;
+  followers: number;
+  rating: number | string;
+  publishedYear: number;
+}
+
+interface ChapterResponse {
+  id: number;
+  comicSlug: string;
+  chapter: number;
+  title: string;
+  views: number;
+}
+
 export default async function ComicDetailPage({
   params,
 }: PageProps) {
   const { slug } = await params;
-  console.log("URL slug:", slug);
 
-  const comic = comics.find((c) => c.slug === slug);
-  console.log("Comic:", comic);
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
 
-  if (!comic) {
+  // =========================
+  // LẤY COMIC TỪ DATABASE
+  // =========================
+
+  const comicResponse = await fetch(
+    `${baseUrl}/api/comics/${slug}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  if (!comicResponse.ok) {
     notFound();
   }
 
-  const comicsPath = path.join(
-  process.cwd(),
-  "data",
-  "comics.json"
-);
+  const comic: ComicResponse =
+    await comicResponse.json();
 
-const comicsFile = await fs.readFile(
-  comicsPath,
-  "utf-8"
-);
+  // =========================
+  // LẤY CHAPTER TỪ DATABASE
+  // =========================
 
-const comicsData = JSON.parse(comicsFile);
+  const chaptersResponse = await fetch(
+    `${baseUrl}/api/comics/${slug}/chapters`,
+    {
+      cache: "no-store",
+    }
+  );
 
-const comicFromJson = comicsData.find(
-  (item: { slug: string }) => item.slug === slug
-);
+  if (!chaptersResponse.ok) {
+    notFound();
+  }
 
-const comicViews =
-  comicFromJson?.views ?? comic.views;
-  console.log("Comic views từ JSON:", comicViews);
+  const comicChapters: ChapterResponse[] =
+    await chaptersResponse.json();
 
-  const comicChapters = chapters
-    .filter((c) => c.comicSlug === slug)
-    .sort((a, b) => b.chapter - a.chapter);
+  // Sắp xếp chapter mới nhất lên trước
+  comicChapters.sort(
+    (a, b) => b.chapter - a.chapter
+  );
+
+  // =========================
+  // GIAO DIỆN
+  // =========================
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
 
-      <ComicHeader comic={{
-        ...comic,
-        views: comicViews,
-      }} />
+      <ComicHeader
+  comic={{
+    ...comic,
+    chapterCount: comicChapters.length,
+  }}
+/>
 
       <ComicActions />
 
@@ -68,9 +107,9 @@ const comicViews =
       />
 
       <ChapterList
-  slug={comic.slug}
-  chapters={comicChapters}
-/>
+        slug={comic.slug}
+        chapters={comicChapters}
+      />
 
     </div>
   );

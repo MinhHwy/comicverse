@@ -61,8 +61,11 @@ export default function ChapterList({
     const loadChapters = async () => {
       try {
         const response = await fetch(
-          `/api/chapters/${slug}`
-        );
+  `/api/comics/${slug}/chapters`,
+  {
+    cache: "no-store",
+  }
+);
 
         if (!response.ok) {
           throw new Error(
@@ -105,7 +108,7 @@ export default function ChapterList({
             <span className="flex items-center gap-1 text-sm text-gray-500">
               <Eye size={16} />
 
-              {chapter.views.toLocaleString()} lượt xem
+              {chapter.views.toLocaleString("vi-VN")} lượt xem
             </span>
           </Link>
         ))}
