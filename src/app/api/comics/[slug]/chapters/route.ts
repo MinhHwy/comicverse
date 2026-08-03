@@ -69,13 +69,13 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(
-      chapters.map((chapter) => ({
-        id: chapter.id,
-        comicSlug: slug,
-        chapter: chapter.chapterNumber,
-        title: chapter.title,
-        views: chapter.views,
+   type ChapterItem = (typeof chapters)[number];
+
+return NextResponse.json(
+  chapters.map((chapter: ChapterItem) => ({
+    id: chapter.id,
+    comicSlug: slug,
+    chapter: chapter.chapterNumber,
       }))
     );
   } catch (error) {
