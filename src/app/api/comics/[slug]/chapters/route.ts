@@ -76,6 +76,8 @@ return NextResponse.json(
     id: chapter.id,
     comicSlug: slug,
     chapter: chapter.chapterNumber,
+    title: chapter.title,
+    views: chapter.views,
       }))
     );
   } catch (error) {

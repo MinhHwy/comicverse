@@ -108,7 +108,7 @@ export default function ChapterList({
             <span className="flex items-center gap-1 text-sm text-gray-500">
               <Eye size={16} />
 
-              {chapter.views.toLocaleString("vi-VN")} lượt xem
+              {(chapter.views ?? 0).toLocaleString("vi-VN")} lượt xem
             </span>
           </Link>
         ))}
