@@ -39,7 +39,9 @@ export async function GET() {
   },
 });
 
-  const result = comics.map((comic) => ({
+ type ComicItem = (typeof comics)[number];
+
+const result = comics.map((comic: ComicItem) => ({
   ...comic,
   chapterCount: comic._count.chapters,
   _count: undefined,
