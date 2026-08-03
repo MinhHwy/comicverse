@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 
 // import { PrismaClient } from "@prisma/client";
 // import { PrismaMariaDb } from "@prisma/adapter-mariadb";
@@ -88,7 +89,7 @@ export async function POST(
     // =========================
 
     const result = await prisma.$transaction(
-      async (tx) => {
+  async (tx: Prisma.TransactionClient) => {
         // Tăng lượt xem chapter
         const updatedChapter =
           await tx.chapter.update({
