@@ -88,40 +88,71 @@ export async function POST(
     // Tăng views bằng Transaction
     // =========================
 
-    const result = await prisma.$transaction(
-  async (tx) => {
-        // Tăng lượt xem chapter
-        const updatedChapter =
-          await tx.chapter.update({
-            where: {
-              id: chapterData.id,
-            },
-            data: {
-              views: {
-                increment: 1,
-              },
-            },
-          });
 
-        // Tăng lượt xem comic
-        const updatedComic =
-          await tx.comic.update({
-            where: {
-              id: chapterData.comicId,
-            },
-            data: {
-              views: {
-                increment: 1,
-              },
-            },
-          });
 
-        return {
-          chapterViews: updatedChapter.views,
-          comicViews: updatedComic.views,
-        };
-      }
-    );
+    const [updatedChapter, updatedComic] =
+  await prisma.$transaction([
+    prisma.chapter.update({
+      where: {
+        id: chapterData.id,
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    }),
+
+    prisma.comic.update({
+      where: {
+        id: chapterData.comicId,
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    }),
+  ]);
+
+const result = {
+  chapterViews: updatedChapter.views,
+  comicViews: updatedComic.views,
+};
+  //   const result = await prisma.$transaction(
+  // async (tx) => {
+  //       // Tăng lượt xem chapter
+  //       const updatedChapter =
+  //         await tx.chapter.update({
+  //           where: {
+  //             id: chapterData.id,
+  //           },
+  //           data: {
+  //             views: {
+  //               increment: 1,
+  //             },
+  //           },
+  //         });
+
+  //       // Tăng lượt xem comic
+  //       const updatedComic =
+  //         await tx.comic.update({
+  //           where: {
+  //             id: chapterData.comicId,
+  //           },
+  //           data: {
+  //             views: {
+  //               increment: 1,
+  //             },
+  //           },
+  //         });
+
+  //       return {
+  //         chapterViews: updatedChapter.views,
+  //         comicViews: updatedComic.views,
+  //       };
+  //     }
+  //   );
 
     // =========================
     // Trả kết quả
