@@ -44,8 +44,10 @@ export async function GET() {
       },
     });
 
+    type ChapterWithComic = (typeof chapters)[number];
+
     return NextResponse.json(
-      chapters.map((chapter) => ({
+      chapters.map((chapter: ChapterWithComic) => ({
         id: chapter.id,
         comicSlug: chapter.comic.slug,
         chapter: chapter.chapterNumber,
@@ -54,25 +56,22 @@ export async function GET() {
       }))
     );
   } catch (error) {
-    console.error(
-      "Get chapters error:",
-      error
-    );
+    console.error("Get chapters error:", error);
 
     return NextResponse.json(
       {
-        message:
-          "Có lỗi xảy ra khi lấy danh sách chapter.",
+        message: "Có lỗi xảy ra khi lấy danh sách chapter.",
       },
       {
         status: 500,
       }
     );
   }
+}
   // } finally {
   //   await prisma.$disconnect();
   // }
-}
+
 
 // =========================
 // POST - Tạo chapter
