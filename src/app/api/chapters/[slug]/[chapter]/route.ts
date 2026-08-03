@@ -85,8 +85,8 @@ export async function GET(
       title: chapterData.title,
       views: chapterData.views,
       images: chapterData.images.map(
-        (image) => image.imageUrl
-      ),
+  (image: { imageUrl: string }) => image.imageUrl
+),
     });
   } catch (error) {
     console.error(
