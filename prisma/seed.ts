@@ -114,6 +114,43 @@ async function main() {
       publishedYear: 2010,
     },
   });
+  
+  await prisma.comic.upsert({
+  where: {
+    slug: "ti-quay",
+  },
+  update: {
+    title: "Tí Quậy",
+    alternativeTitle: null,
+    author: "Đào Hải",
+    artist: "Đào Hải",
+    description:
+      "Tí Quậy là bộ truyện tranh thiếu nhi Việt Nam xoay quanh những câu chuyện hài hước, tinh nghịch và gần gũi trong cuộc sống của cậu bé Tí cùng bạn bè và những người xung quanh. Với những tình huống vui nhộn và cách kể chuyện dí dỏm, bộ truyện mang đến nhiều tiếng cười và gắn liền với tuổi thơ của nhiều thế hệ độc giả Việt Nam.",
+    cover: "/covers/ti-quay.jpg",
+    banner: "/covers/ti-quay.jpg",
+    status: "Hoàn thành",
+    views: 0,
+    followers: 0,
+    rating: 0,
+    publishedYear: 2003,
+  },
+  create: {
+    slug: "ti-quay",
+    title: "Tí Quậy",
+    alternativeTitle: null,
+    author: "Đào Hải",
+    artist: "Đào Hải",
+    description:
+      "Tí Quậy là bộ truyện tranh thiếu nhi Việt Nam xoay quanh những câu chuyện hài hước, tinh nghịch và gần gũi trong cuộc sống của cậu bé Tí cùng bạn bè và những người xung quanh. Với những tình huống vui nhộn và cách kể chuyện dí dỏm, bộ truyện mang đến nhiều tiếng cười và gắn liền với tuổi thơ của nhiều thế hệ độc giả Việt Nam.",
+    cover: "/covers/ti-quay.jpg",
+    banner: "/covers/ti-quay.jpg",
+    status: "Hoàn thành",
+    views: 0,
+    followers: 0,
+    rating: 0,
+    publishedYear: 2003,
+  },
+});
 
   console.log("Seed thành công!");
 }
