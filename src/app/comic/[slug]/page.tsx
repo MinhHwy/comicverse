@@ -100,7 +100,7 @@ export default async function ComicDetailPage({
   }}
 />
 
-      <ComicActions />
+      <ComicActions slug={comic.slug} />
 
       <ComicDescription
         description={comic.description}
