@@ -207,6 +207,7 @@ export default async function ChapterReaderPage({
               width={1200}
               height={1800}
               priority={index < 2}
+              unoptimized
               className="h-auto w-full"
             />
 
