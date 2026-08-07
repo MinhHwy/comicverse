@@ -85,6 +85,11 @@ export default async function ComicDetailPage({
   comicChapters.sort(
     (a, b) => b.chapter - a.chapter
   );
+ // Lấy chapter mới nhất
+  const latestChapter =
+  comicChapters.length > 0
+    ? comicChapters[0].chapter
+    : 1;
 
   // =========================
   // GIAO DIỆN
@@ -100,7 +105,11 @@ export default async function ComicDetailPage({
   }}
 />
 
-      <ComicActions slug={comic.slug} />
+      <ComicActions
+  slug={comic.slug}
+  latestChapter={latestChapter}
+/>
+      
 
       <ComicDescription
         description={comic.description}
